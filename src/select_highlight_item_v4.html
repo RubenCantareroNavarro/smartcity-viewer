@@ -71,6 +71,11 @@
     <pre id="features"></pre>
     <nav id="menu"></nav>
 
+    <div style="position: absolute; z-index: 1;">
+        <input type="checkbox" name="buildings_school" value="Schools" id="schools_check" onclick="checkSchools()">
+        <label for=" schools_check ">Schools</label><br>
+    </div>
+
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5jbjkwIiwiYSI6ImNrYWdudzluOTA1Zm0zMW1vcGxiZDFpN3gifQ.Gi7bav34XZCKoS9SczeeDg';
         var map = new mapboxgl.Map({
@@ -88,6 +93,23 @@
                     'http://localhost:8080/grid/wms/{z}/{x}/{y}.png'
                 ],
                 'tileSize': 256
+            });
+
+            map.addLayer({
+                "id": "highlight-schools",
+                "source": "composite",
+                'type': 'fill-extrusion',
+                'source-layer': 'building_ciudadreal-93ceca',
+                // 'minzoom': 15,
+                'paint': {
+                    'fill-extrusion-color': '#ff0022',
+                    'fill-extrusion-height': 10,
+                    'fill-extrusion-opacity': 1
+                },
+                'filter': [
+                    'all', ['in', 'building', ''],
+                    ['in', 'amenity', '']
+                ]
             });
 
             map.addLayer({
@@ -138,7 +160,7 @@
                         return memo;
                     }, ['in', 'id']
                 );
-
+                console.log(filter);
                 map.setFilter('highlight-click', filter);
 
                 new mapboxgl.Popup()
@@ -211,6 +233,26 @@
 
             var layers = document.getElementById('menu');
             layers.appendChild(link);
+        }
+
+
+        function checkSchools() {
+            var checkBox = document.getElementById("schools_check");
+
+            if (checkBox.checked == true) {
+                console.log("True");
+                map.setFilter('highlight-schools', [
+                    'all', ['in', 'building', 'yes'],
+                    ['in', 'amenity', 'school']
+                ]);
+
+            } else {
+                console.log("False");
+                map.setFilter('highlight-schools', [
+                    'all', ['in', 'building', ''],
+                    ['in', 'amenity', '']
+                ]);
+            }
         }
     </script>
 
