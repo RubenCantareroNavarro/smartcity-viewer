@@ -115,7 +115,6 @@
                 "source": "streets-near-school",
                 'type': 'line',
                 'layout': {
-                    // make layer visible by default
                     'visibility': 'none'
                 },
                 'minzoom': 14,
@@ -126,27 +125,27 @@
                 }
             });
 
-            map.addSource('circles-school', {
-                'type': 'geojson',
-                'data': {
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'Polygon',
-                        'coordinates': []
-                    }
-                }
-            });
+            // map.addSource('circles-school', {
+            //     'type': 'geojson',
+            //     'data': {
+            //         'type': 'Feature',
+            //         'geometry': {
+            //             'type': 'Polygon',
+            //             'coordinates': []
+            //         }
+            //     }
+            // });
 
-            map.addLayer({
-                "id": "highlight-schools-circle",
-                "source": "circles-school",
-                'type': 'fill',
-                // 'minzoom': 15,
-                'paint': {
-                    'fill-color': '#f70000',
-                    'fill-opacity': 0.7
-                }
-            });
+            // map.addLayer({
+            //     "id": "highlight-schools-circle",
+            //     "source": "circles-school",
+            //     'type': 'fill',
+            //     // 'minzoom': 15,
+            //     'paint': {
+            //         'fill-color': '#f70000',
+            //         'fill-opacity': 0.7
+            //     }
+            // });
 
             map.addSource('amenity-school', {
                 type: 'geojson',
@@ -158,8 +157,8 @@
                 "source": "amenity-school",
                 'type': 'fill',
                 'paint': {
-                    'fill-color': '#9c00f7',
-                    'fill-opacity': 0.40
+                    'fill-color': '#ab85ff',
+                    'fill-opacity': 0.70
                 },
                 'filter': [
                     'in', 'amenity', ''
@@ -170,10 +169,10 @@
                 "id": "highlight-schools",
                 "source": "composite",
                 'type': 'fill-extrusion',
-                'source-layer': 'building_ciudadreal-93ceca',
+                'source-layer': 'building_ciudadreal-1yay5d',
                 // 'minzoom': 15,
                 'paint': {
-                    'fill-extrusion-color': '#9c00f7',
+                    'fill-extrusion-color': '#5000ff',
                     'fill-extrusion-height': 10,
                     'fill-extrusion-opacity': 1
                 },
@@ -186,7 +185,7 @@
                 "id": "highlight-hospitals",
                 "source": "composite",
                 'type': 'fill-extrusion',
-                'source-layer': 'building_ciudadreal-93ceca',
+                'source-layer': 'building_ciudadreal-1yay5d',
                 // 'minzoom': 15,
                 'paint': {
                     'fill-extrusion-color': '#005ff7',
@@ -202,12 +201,12 @@
                 "id": "highlight-click",
                 "source": "composite",
                 'type': 'fill-extrusion',
-                'source-layer': 'building_ciudadreal-93ceca',
+                'source-layer': 'building_ciudadreal-1yay5d',
                 // 'minzoom': 15,
                 'paint': {
                     'fill-extrusion-color': '#6e599f',
                     'fill-extrusion-height': 10,
-                    'fill-extrusion-opacity': 0.43
+                    'fill-extrusion-opacity': 1
                 },
                 'filter': ['in', 'id', '']
             });
@@ -216,12 +215,12 @@
                 "id": "highlight-mousemove",
                 "source": "composite",
                 'type': 'fill-extrusion',
-                'source-layer': 'building_ciudadreal-93ceca',
+                'source-layer': 'building_ciudadreal-1yay5d',
                 // 'minzoom': 15,
                 'paint': {
                     'fill-extrusion-color': '#e9fa00',
                     'fill-extrusion-height': 10,
-                    'fill-extrusion-opacity': 0.43
+                    'fill-extrusion-opacity': 1
                 },
                 'filter': ['in', 'id', '']
             });
@@ -246,7 +245,7 @@
                         return memo;
                     }, ['in', 'id']
                 );
-                console.log(filter);
+
                 map.setFilter('highlight-click', filter);
 
                 new mapboxgl.Popup()
@@ -326,13 +325,11 @@
             var checkBox = document.getElementById("schools_check");
 
             if (checkBox.checked == true) {
-                console.log("True");
                 map.setFilter('highlight-schools', [
                     'in', 'building', 'school'
                 ]);
 
             } else {
-                console.log("False");
                 map.setFilter('highlight-schools', [
                     'in', 'building', ''
                 ]);
@@ -343,13 +340,11 @@
             var checkBox = document.getElementById("hospitals_check");
 
             if (checkBox.checked == true) {
-                console.log("True");
                 map.setFilter('highlight-hospitals', [
                     'in', 'building', 'hospital'
                 ]);
 
             } else {
-                console.log("False");
                 map.setFilter('highlight-hospitals', [
                     'in', 'building', ''
                 ]);
@@ -362,7 +357,6 @@
 
 
             if (checkBox.checked == true) {
-                console.log("True");
                 map.setFilter('highlight-schools', [
                     'all', ['in', 'building', 'yes'],
                     ['in', 'amenity', 'school']
@@ -402,7 +396,6 @@
                 // }
 
             } else {
-                console.log("False");
                 map.setFilter('highlight-schools', [
                     'all', ['in', 'building', ''],
                     ['in', 'amenity', '']
