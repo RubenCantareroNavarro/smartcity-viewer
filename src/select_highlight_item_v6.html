@@ -325,8 +325,14 @@
             var checkBox = document.getElementById("schools_check");
 
             if (checkBox.checked == true) {
+                // Only schools
+                // map.setFilter('highlight-schools', [
+                //     'in', 'building', 'school'
+                // ]);
+
                 map.setFilter('highlight-schools', [
-                    'in', 'building', 'school'
+                    'any', ['in', 'building', 'school'],
+                    ['in', 'building', 'university']
                 ]);
 
             } else {
@@ -357,13 +363,15 @@
 
 
             if (checkBox.checked == true) {
-                map.setFilter('highlight-schools', [
-                    'all', ['in', 'building', 'yes'],
-                    ['in', 'amenity', 'school']
-                ]);
+                // Only schools land use
+                // map.setFilter('highlight-amenity-school', [
+                //     'in', 'amenity', 'school'
+                // ]);
+
 
                 map.setFilter('highlight-amenity-school', [
-                    'in', 'amenity', 'school'
+                    'any', ['in', 'amenity', 'school'],
+                    ['in', 'amenity', 'university']
                 ]);
 
 
@@ -396,11 +404,6 @@
                 // }
 
             } else {
-                map.setFilter('highlight-schools', [
-                    'all', ['in', 'building', ''],
-                    ['in', 'amenity', '']
-                ]);
-
                 map.setFilter('highlight-amenity-school', [
                     'in', 'amenity', ''
                 ]);
