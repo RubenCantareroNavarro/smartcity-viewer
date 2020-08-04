@@ -83,6 +83,9 @@
 
         <input type="checkbox" name="streets_near" value="Streets near school" id="streets_near_school_cb" onclick="checkStreetsNearSchool()">
         <label for=" streets_near_school_cb ">Streets near school</label><br>
+
+        <input type="checkbox" name="show_heatmap" value="Show Heatmap" id="show_heatmap_cb" onclick="checkShowHeatmap()">
+        <label for=" show_heatmap_cb ">Show heatmap</label><br>
     </div>
 
     <script src="https://npmcdn.com/@turf/turf@5.1.6/turf.min.js"></script>
@@ -222,6 +225,9 @@
                 'id': 'amenity-danger-heat',
                 'type': 'heatmap',
                 'source': 'amenity-danger',
+                'layout': {
+                    'visibility': 'none'
+                },
                 'minzoom': 14,
                 'maxzoom': 17,
                 'paint': {
@@ -284,6 +290,9 @@
                 'id': 'amenity-danger-point',
                 'type': 'circle',
                 'source': 'amenity-danger',
+                'layout': {
+                    'visibility': 'none'
+                },
                 'minzoom': 17,
                 'paint': {
                     // Size circle radius by earthquake magnitude and zoom level
@@ -460,6 +469,18 @@
                 map.setLayoutProperty('highlight-streets-near-school', 'visibility', 'visible');
             } else {
                 map.setLayoutProperty('highlight-streets-near-school', 'visibility', 'none');
+            }
+        }
+
+        function checkShowHeatmap() {
+            var checkBox = document.getElementById("show_heatmap_cb");
+
+            if (checkBox.checked == true) {
+                map.setLayoutProperty('amenity-danger-heat', 'visibility', 'visible');
+                map.setLayoutProperty('amenity-danger-point', 'visibility', 'visible');
+            } else {
+                map.setLayoutProperty('amenity-danger-heat', 'visibility', 'none');
+                map.setLayoutProperty('amenity-danger-point', 'visibility', 'none');
             }
         }
     </script>
