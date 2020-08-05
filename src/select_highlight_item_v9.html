@@ -481,28 +481,57 @@
                 map.setLayoutProperty('amenity-danger-heat', 'visibility', 'visible');
                 map.setLayoutProperty('amenity-danger-point', 'visibility', 'visible');
 
-                // postData("39.001441 -3.924548 38.976429 -3.930899");
+                postData("danger", 39.001441, -3.924548, 38.976429, -3.930899);
             } else {
                 map.setLayoutProperty('amenity-danger-heat', 'visibility', 'none');
                 map.setLayoutProperty('amenity-danger-point', 'visibility', 'none');
             }
         }
 
-        // function postData(input) {
-        //     $.ajax({
-        //         type: "POST",
-        //         url: "http://0.0.0.0:8081/src/calculate-routes.py",
-        //         data: {
-        //             param: input
-        //         },
-        //         success: callbackFunc
-        //     });
-        // }
+        function postData(route_type, origin_lat, origin_lon, destination_lat, destination_lon) {
+            $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/covid19-routes/api/v1.0/ciudad-real/",
+                data: {
+                    // param: input
+                    route_type: "safe",
+                    origin_lat: origin_lat,
+                    origin_lon: origin_lon,
+                    destination_lat: destination_lat,
+                    destination_lon: destination_lon
+                },
+                success: callbackFunc
+            });
+        }
 
-        // function callbackFunc(response) {
-        //     // do something with the response
-        //     console.log("HOLA");
-        // }
+        function callbackFunc(response) {
+            if (map.getSource("route")) {
+                map.removeSource("route");
+            }
+
+            // if (map.getLayer("route")) {
+            //     map.removeLayer("route");
+            // }
+
+
+            map.addSource('route', {
+                'type': 'geojson',
+                'data': response
+            });
+            map.addLayer({
+                'id': 'route',
+                'type': 'line',
+                'source': 'route',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#008cff',
+                    'line-width': 6
+                }
+            });
+        }
     </script>
 
 </body>

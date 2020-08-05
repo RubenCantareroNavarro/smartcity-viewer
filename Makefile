@@ -9,6 +9,3 @@ start-olc-server:
 start-map-server: 
 	python3 -m http.server 8082
 	
-start-route-server:
-	python3 -m http.server --directory ../covid19-routes/ 8081
-
