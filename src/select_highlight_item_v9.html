@@ -217,10 +217,14 @@
                 }
             });
 
+
             // IN PROGRESS
             map.addSource('amenity-danger', {
                 'type': 'geojson',
-                'data': 'http://0.0.0.0:8000/data/danger_points.geojson'
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
             });
 
             map.addLayer({
@@ -323,9 +327,9 @@
                     ]
                 }
             }, 'building-ciudadreal-osm');
-        });
 
-        // 
+
+        });
 
         map.on('click', function(e) {
             var features = map.queryRenderedFeatures(e.point, {
@@ -477,10 +481,20 @@
         function checkShowHeatmap() {
             var checkBox = document.getElementById("show_heatmap_cb");
 
+            $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/covid19-routes/api/v1.0/ciudad-real/danger-points/",
+                success: function(response) {
+                    console.log("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                    map.getSource('amenity-danger').setData(response);
+                }
+            });
+
             if (checkBox.checked == true) {
                 map.setLayoutProperty('amenity-danger-heat', 'visibility', 'visible');
                 map.setLayoutProperty('amenity-danger-point', 'visibility', 'visible');
 
+                // REVISAR
                 postData("danger", 39.001441, -3.924548, 38.976429, -3.930899);
             } else {
                 map.setLayoutProperty('amenity-danger-heat', 'visibility', 'none');
@@ -491,7 +505,7 @@
         function postData(route_type, origin_lat, origin_lon, destination_lat, destination_lon) {
             $.ajax({
                 type: "GET",
-                url: "http://127.0.0.1:5000/covid19-routes/api/v1.0/ciudad-real/",
+                url: "http://127.0.0.1:5000/covid19-routes/api/v1.0/ciudad-real/route/",
                 data: {
                     // param: input
                     route_type: "safe",
