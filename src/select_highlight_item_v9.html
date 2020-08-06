@@ -86,6 +86,8 @@
 
         <input type="checkbox" name="show_heatmap" value="Show Heatmap" id="show_heatmap_cb" onclick="checkShowHeatmap()">
         <label for=" show_heatmap_cb ">Show heatmap</label><br>
+
+        <button type="button" onclick="calculateRoute()">Calcular ruta</button>
     </div>
 
     <script src="https://npmcdn.com/@turf/turf@5.1.6/turf.min.js"></script>
@@ -93,13 +95,29 @@
 
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5jbjkwIiwiYSI6ImNrYWdudzluOTA1Zm0zMW1vcGxiZDFpN3gifQ.Gi7bav34XZCKoS9SczeeDg';
+        var ciudad_real = [-3.927374, 38.985531];
+
         var map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/rubencn90/ckb7sgy614r7y1jnre2lk557p/draft',
-            center: [-3.927374, 38.985531], // Ciudad Real
-            // center: [-3.714462, 40.416386], //Madrid
+            center: ciudad_real,
             zoom: 14
         });
+
+        var destination_marker = new mapboxgl.Marker({
+                draggable: true,
+                color: '#ff005d'
+            })
+            .setLngLat(ciudad_real)
+            .addTo(map);
+
+        var origin_marker = new mapboxgl.Marker({
+                draggable: true,
+                color: '#23db54'
+            })
+            .setLngLat(ciudad_real)
+            .addTo(map);
+
 
         map.on('load', function() {
             map.addSource('wms-olc', {
@@ -328,6 +346,49 @@
                 }
             }, 'building-ciudadreal-osm');
 
+            map.addSource('safe_route', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            });
+
+            map.addLayer({
+                'id': 'safe_route',
+                'type': 'line',
+                'source': 'safe_route',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#00bd06',
+                    'line-width': 6
+                }
+            });
+
+            map.addSource('danger_route', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            });
+
+            map.addLayer({
+                'id': 'danger_route',
+                'type': 'line',
+                'source': 'danger_route',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#ff004c',
+                    'line-width': 6
+                }
+            });
 
         });
 
@@ -485,7 +546,6 @@
                 type: "GET",
                 url: "http://127.0.0.1:5000/covid19-routes/api/v1.0/ciudad-real/danger-points/",
                 success: function(response) {
-                    console.log("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                     map.getSource('amenity-danger').setData(response);
                 }
             });
@@ -493,61 +553,38 @@
             if (checkBox.checked == true) {
                 map.setLayoutProperty('amenity-danger-heat', 'visibility', 'visible');
                 map.setLayoutProperty('amenity-danger-point', 'visibility', 'visible');
-
-                // REVISAR
-                postData("danger", 39.001441, -3.924548, 38.976429, -3.930899);
             } else {
                 map.setLayoutProperty('amenity-danger-heat', 'visibility', 'none');
                 map.setLayoutProperty('amenity-danger-point', 'visibility', 'none');
             }
         }
 
-        function postData(route_type, origin_lat, origin_lon, destination_lat, destination_lon) {
+
+        function calculateRoute() {
+            var origin = origin_marker.getLngLat();
+            var destination = destination_marker.getLngLat();
+
+            showRoute('safe_route', 'safe', origin.lat, origin.lng, destination.lat, destination.lng);
+            showRoute('danger_route', 'danger', origin.lat, origin.lng, destination.lat, destination.lng);
+        }
+
+        function showRoute(source, route_type, origin_lat, origin_lon, destination_lat, destination_lon) {
             $.ajax({
                 type: "GET",
                 url: "http://127.0.0.1:5000/covid19-routes/api/v1.0/ciudad-real/route/",
                 data: {
-                    // param: input
-                    route_type: "safe",
+                    route_type: route_type,
                     origin_lat: origin_lat,
                     origin_lon: origin_lon,
                     destination_lat: destination_lat,
                     destination_lon: destination_lon
                 },
-                success: callbackFunc
-            });
-        }
-
-        function callbackFunc(response) {
-            if (map.getSource("route")) {
-                map.removeSource("route");
-            }
-
-            // if (map.getLayer("route")) {
-            //     map.removeLayer("route");
-            // }
-
-
-            map.addSource('route', {
-                'type': 'geojson',
-                'data': response
-            });
-            map.addLayer({
-                'id': 'route',
-                'type': 'line',
-                'source': 'route',
-                'layout': {
-                    'line-join': 'round',
-                    'line-cap': 'round'
-                },
-                'paint': {
-                    'line-color': '#008cff',
-                    'line-width': 6
+                success: function(response) {
+                    map.getSource(source).setData(response);
                 }
             });
         }
     </script>
-
 </body>
 
 </html>
