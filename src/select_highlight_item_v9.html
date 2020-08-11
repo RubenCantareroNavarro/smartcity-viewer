@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <title>Get features under the mouse pointer</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.css" rel="stylesheet" />
     <style>
@@ -86,13 +87,7 @@
 
         <input type="checkbox" name="show_heatmap" value="Show Heatmap" id="show_heatmap_cb" onclick="checkShowHeatmap()">
         <label for=" show_heatmap_cb ">Show heatmap</label><br>
-
-        <button type="button" onclick="calculateRoute()">Calcular ruta</button>
     </div>
-
-    <script src="https://npmcdn.com/@turf/turf@5.1.6/turf.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5jbjkwIiwiYSI6ImNrYWdudzluOTA1Zm0zMW1vcGxiZDFpN3gifQ.Gi7bav34XZCKoS9SczeeDg';
         var ciudad_real = [-3.927374, 38.985531];
@@ -117,6 +112,9 @@
             })
             .setLngLat(ciudad_real)
             .addTo(map);
+
+        destination_marker.on('dragend', onDragEnd);
+        origin_marker.on('dragend', onDragEnd);
 
 
         map.on('load', function() {
@@ -560,7 +558,7 @@
         }
 
 
-        function calculateRoute() {
+        function onDragEnd() {
             var origin = origin_marker.getLngLat();
             var destination = destination_marker.getLngLat();
 
