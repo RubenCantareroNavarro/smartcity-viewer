@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Get features under the mouse pointer</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <style>
+        #menu {
+            background: #fff;
+            position: absolute;
+            z-index: 1;
+            top: 10px;
+            right: 10px;
+            border-radius: 3px;
+            width: 150px;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        #menu a {
+            font-size: 13px;
+            color: #404040;
+            display: block;
+            margin: 0;
+            padding: 0;
+            padding: 10px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+        
+        #menu a:last-child {
+            border: none;
+        }
+        
+        #menu a:hover {
+            background-color: #f8f8f8;
+            color: #404040;
+        }
+        
+        #menu a.active {
+            background-color: #3887be;
+            color: #ffffff;
+        }
+        
+        #menu a.active:hover {
+            background: #3074a4;
+        }
+    </style>
+
+    <div id="map"></div>
+    <pre id="features"></pre>
+    <nav id="menu"></nav>
+
+    <div style="position: absolute; z-index: 1;">
+        <input type="checkbox" name="buildings_school" value="Schools" id="schools_check" onclick="checkSchools()">
+        <label for=" schools_check ">Schools</label><br>
+
+        <input type="checkbox" name="buildings_hospitals" value="Hospitals" id="hospitals_check" onclick="checkHospitals()">
+        <label for=" hospitals_check ">Hospitals</label><br>
+
+        <input type="checkbox" name="buildings_school_landuse" value="Schools Landuse" id="schools_check_landuse" onclick="checkSchoolsLandUse()">
+        <label for=" schools_check_landuse ">Schools Landuse</label><br>
+
+        <input type="checkbox" name="streets_near" value="Streets near school" id="streets_near_school_cb" onclick="checkStreetsNearSchool()">
+        <label for=" streets_near_school_cb ">Streets near school</label><br>
+
+        <input type="checkbox" name="show_heatmap" value="Show Heatmap" id="show_heatmap_cb" onclick="checkShowHeatmap()">
+        <label for=" show_heatmap_cb ">Show heatmap</label><br>
+    </div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5jbjkwIiwiYSI6ImNrYWdudzluOTA1Zm0zMW1vcGxiZDFpN3gifQ.Gi7bav34XZCKoS9SczeeDg';
+        var ciudad_real = [-3.927374, 38.985531];
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/rubencn90/ckb7sgy614r7y1jnre2lk557p/draft',
+            center: ciudad_real,
+            zoom: 14
+        });
+
+        var destination_marker = new mapboxgl.Marker({
+                draggable: true,
+                color: '#ff005d'
+            })
+            .setLngLat(ciudad_real)
+            .addTo(map);
+
+        var origin_marker = new mapboxgl.Marker({
+                draggable: true,
+                color: '#23db54'
+            })
+            .setLngLat(ciudad_real)
+            .addTo(map);
+
+        destination_marker.on('dragend', onDragEnd);
+        origin_marker.on('dragend', onDragEnd);
+
+
+        map.on('load', function() {
+            map.addSource('wms-olc', {
+                'type': 'raster',
+                'tiles': [
+                    'http://localhost:8080/grid/wms/{z}/{x}/{y}.png'
+                ],
+                'tileSize': 256
+            });
+
+            map.addSource('streets-near-school', {
+                'type': 'geojson',
+                'data': 'http://0.0.0.0:8000/data/streets-near.school.geojson'
+            });
+
+            map.addLayer({
+                "id": "highlight-streets-near-school",
+                "source": "streets-near-school",
+                'type': 'line',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'minzoom': 14,
+                'paint': {
+                    'line-color': '#f70000',
+                    'line-opacity': 0.5,
+                    'line-width': 4,
+                }
+            });
+
+            map.addSource('amenity-school', {
+                type: 'geojson',
+                data: 'http://0.0.0.0:8000/data/amenity-school.geojson'
+            });
+
+            map.addLayer({
+                "id": "highlight-amenity-school",
+                "source": "amenity-school",
+                'type': 'fill',
+                'paint': {
+                    'fill-color': '#ab85ff',
+                    'fill-opacity': 0.70
+                },
+                'filter': [
+                    'in', 'amenity', ''
+                ]
+            }, 'building-ciudadreal-osm');
+
+            map.addLayer({
+                "id": "highlight-schools",
+                "source": "composite",
+                'type': 'fill-extrusion',
+                'source-layer': 'building_ciudadreal-070t27',
+                // 'minzoom': 15,
+                'paint': {
+                    'fill-extrusion-color': '#5000ff',
+                    'fill-extrusion-height': 10,
+                    'fill-extrusion-opacity': 1
+                },
+                'filter': [
+                    'in', 'building', ''
+                ]
+            });
+
+            map.addLayer({
+                "id": "highlight-hospitals",
+                "source": "composite",
+                'type': 'fill-extrusion',
+                'source-layer': 'building_ciudadreal-070t27',
+                // 'minzoom': 15,
+                'paint': {
+                    'fill-extrusion-color': '#005ff7',
+                    'fill-extrusion-height': 10,
+                    'fill-extrusion-opacity': 1
+                },
+                'filter': [
+                    'in', 'building', ''
+                ]
+            });
+
+            map.addLayer({
+                "id": "highlight-click",
+                "source": "composite",
+                'type': 'fill-extrusion',
+                'source-layer': 'building_ciudadreal-070t27',
+                // 'minzoom': 15,
+                'paint': {
+                    'fill-extrusion-color': '#6e599f',
+                    'fill-extrusion-height': 10,
+                    'fill-extrusion-opacity': 1
+                },
+                'filter': ['in', 'id', '']
+            });
+
+            map.addLayer({
+                "id": "highlight-mousemove",
+                "source": "composite",
+                'type': 'fill-extrusion',
+                'source-layer': 'building_ciudadreal-070t27',
+                // 'minzoom': 15,
+                'paint': {
+                    'fill-extrusion-color': '#e9fa00',
+                    'fill-extrusion-height': 10,
+                    'fill-extrusion-opacity': 1
+                },
+                'filter': ['in', 'id', '']
+            });
+
+            map.addLayer({
+                'id': 'wms-olc-layer',
+                'type': 'raster',
+                'source': 'wms-olc',
+                'paint': {
+                    'raster-opacity': 0.2
+                }
+            });
+
+
+            // IN PROGRESS
+            map.addSource('amenity-danger', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            });
+
+            map.addLayer({
+                'id': 'amenity-danger-heat',
+                'type': 'heatmap',
+                'source': 'amenity-danger',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'minzoom': 14,
+                'maxzoom': 17,
+                'paint': {
+                    // Increase the heatmap weight based on frequency and property magnitude
+                    'heatmap-weight': [
+                        'interpolate', ['linear'],
+                        ['get', 'danger'],
+                        0,
+                        0,
+                        10,
+                        1
+                    ],
+                    // Increase the heatmap color weight weight by zoom level
+                    // heatmap-intensity is a multiplier on top of heatmap-weight
+                    'heatmap-intensity': [
+                        'interpolate', ['linear'],
+                        ['zoom'],
+                        0,
+                        1,
+                        16,
+                        10
+                    ],
+                    // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
+                    // Begin color ramp at 0-stop with a 0-transparancy color
+                    // to create a blur-like effect.
+                    'heatmap-color': [
+                        'interpolate', ['linear'],
+                        ['heatmap-density'],
+                        0,
+                        'rgba(33,102,172,0)',
+                        0.1,
+                        'rgb(253,219,199)',
+                        0.5,
+                        'rgb(239,138,98)',
+                        1,
+                        'rgb(178,24,43)'
+                    ],
+                    // Adjust the heatmap radius by zoom level
+                    'heatmap-radius': [
+                        'interpolate', ['linear'],
+                        ['zoom'],
+                        1,
+                        2,
+                        16,
+                        20
+                    ],
+                    // Transition from heatmap to circle layer by zoom level
+                    'heatmap-opacity': [
+                        'interpolate', ['linear'],
+                        ['zoom'],
+                        7,
+                        1,
+                        18,
+                        0.5
+                    ]
+                }
+            }, 'building-ciudadreal-osm');
+
+            map.addLayer({
+                'id': 'amenity-danger-point',
+                'type': 'circle',
+                'source': 'amenity-danger',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'minzoom': 17,
+                'paint': {
+                    // Size circle radius by earthquake magnitude and zoom level
+                    'circle-radius': 5,
+                    // Color circle by earthquake magnitude
+                    'circle-color': [
+                        'interpolate', ['linear'],
+                        ['get', 'danger'],
+                        1,
+                        'rgb(253,219,199)',
+                        5,
+                        'rgb(239,138,98)',
+                        10,
+                        'rgb(178,24,43)'
+                    ],
+                    'circle-stroke-color': 'white',
+                    'circle-stroke-width': 1,
+                    // Transition from heatmap to circle layer by zoom level
+                    'circle-opacity': [
+                        'interpolate', ['linear'],
+                        ['zoom'],
+                        7,
+                        0,
+                        8,
+                        1
+                    ]
+                }
+            }, 'building-ciudadreal-osm');
+
+            map.addSource('safe_route', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            });
+
+            map.addLayer({
+                'id': 'safe_route',
+                'type': 'line',
+                'source': 'safe_route',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#00bd06',
+                    'line-width': 6
+                }
+            });
+
+            map.addSource('danger_route', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            });
+
+            map.addLayer({
+                'id': 'danger_route',
+                'type': 'line',
+                'source': 'danger_route',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#ff004c',
+                    'line-width': 6
+                }
+            });
+
+        });
+
+        map.on('click', 'building-ciudadreal-osm', function(e) {
+            var filter = e.features.reduce(
+                function(memo, feature) {
+                    memo.push(feature.properties.id);
+                    return memo;
+                }, ['in', 'id']
+            );
+
+            map.setFilter('highlight-click', filter);
+
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML(e.features[0].properties.name)
+                .addTo(map);
+        });
+
+        map.on('mousemove', function(e) {
+            var features = map.queryRenderedFeatures(e.point, {
+                layers: ['building-ciudadreal-osm']
+            });
+
+            var filter = features.reduce(
+                function(memo, feature) {
+                    memo.push(feature.properties.id);
+                    return memo;
+                }, ['in', 'id']
+            );
+
+            map.setFilter('highlight-mousemove', filter);
+        });
+
+        map.on('mouseenter', 'building-ciudadreal-osm', function() {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        map.on('mouseleave', 'building-ciudadreal-osm', function() {
+            map.getCanvas().style.cursor = '';
+        });
+
+        map.on('click', 'amenity-danger-point', function(e) {
+            var coordinates = e.features[0].geometry.coordinates.slice();
+            var properties = e.features[0].properties;
+            var description = '<strong>Danger Point</strong><p>Amenity near: ' + properties.amenity_near + '</p>' + '<p>Danger level: ' + properties.danger + '</p>'
+
+            new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map);
+        });
+
+        map.on('mouseenter', 'amenity-danger-point', function() {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        map.on('mouseleave', 'amenity-danger-point', function() {
+            map.getCanvas().style.cursor = '';
+        });
+
+        // enumerate ids of the layers
+        var toggleableLayerIds = ['building-ciudadreal-osm', 'wms-olc-layer'];
+
+        // set up the corresponding toggle button for each layer
+        for (var i = 0; i < toggleableLayerIds.length; i++) {
+            var id = toggleableLayerIds[i];
+
+            var link = document.createElement('a');
+            link.href = '#';
+            link.className = 'active';
+            link.setAttribute("layer_id", id);
+
+
+            if (id == 'building-ciudadreal-osm') {
+                link.textContent = '3D Buildings';
+            } else if (id == 'wms-olc-layer') {
+                link.textContent = 'OpenLocationCodes';
+            };
+
+            link.onclick = function(e) {
+                var clickedLayer = this.getAttribute("layer_id");
+                e.preventDefault();
+                e.stopPropagation();
+
+                var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+                // toggle layer visibility by changing the layout object's visibility property
+                if (visibility === 'visible') {
+                    map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                    this.className = '';
+                } else {
+                    this.className = 'active';
+                    map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+                }
+            };
+
+            var layers = document.getElementById('menu');
+            layers.appendChild(link);
+        }
+
+
+        function checkSchools() {
+            var checkBox = document.getElementById("schools_check");
+
+            if (checkBox.checked == true) {
+
+                map.setFilter('highlight-schools', [
+                    'any', ['in', 'building', 'school'],
+                    ['in', 'building', 'university']
+                ]);
+
+            } else {
+                map.setFilter('highlight-schools', [
+                    'in', 'building', ''
+                ]);
+            }
+        }
+
+        function checkHospitals() {
+            var checkBox = document.getElementById("hospitals_check");
+
+            if (checkBox.checked == true) {
+                map.setFilter('highlight-hospitals', [
+                    'in', 'building', 'hospital'
+                ]);
+
+            } else {
+                map.setFilter('highlight-hospitals', [
+                    'in', 'building', ''
+                ]);
+            }
+        }
+
+
+        function checkSchoolsLandUse() {
+            var checkBox = document.getElementById("schools_check_landuse");
+
+
+            if (checkBox.checked == true) {
+                map.setFilter('highlight-amenity-school', [
+                    'any', ['in', 'amenity', 'school'],
+                    ['in', 'amenity', 'university']
+                ]);
+
+            } else {
+                map.setFilter('highlight-amenity-school', [
+                    'in', 'amenity', ''
+                ]);
+
+            }
+        }
+
+        function checkStreetsNearSchool() {
+            var checkBox = document.getElementById("streets_near_school_cb");
+
+            if (checkBox.checked == true) {
+                map.setLayoutProperty('highlight-streets-near-school', 'visibility', 'visible');
+            } else {
+                map.setLayoutProperty('highlight-streets-near-school', 'visibility', 'none');
+            }
+        }
+
+        function checkShowHeatmap() {
+            var checkBox = document.getElementById("show_heatmap_cb");
+
+            $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/covid19-routes/api/v1.0/ciudad-real/danger-points/",
+                success: function(response) {
+                    map.getSource('amenity-danger').setData(response);
+                }
+            });
+
+            if (checkBox.checked == true) {
+                map.setLayoutProperty('amenity-danger-heat', 'visibility', 'visible');
+                map.setLayoutProperty('amenity-danger-point', 'visibility', 'visible');
+            } else {
+                map.setLayoutProperty('amenity-danger-heat', 'visibility', 'none');
+                map.setLayoutProperty('amenity-danger-point', 'visibility', 'none');
+            }
+        }
+
+
+        function onDragEnd() {
+            var origin = origin_marker.getLngLat();
+            var destination = destination_marker.getLngLat();
+
+            showRoute('safe_route', 'safe', origin.lat, origin.lng, destination.lat, destination.lng);
+            showRoute('danger_route', 'danger', origin.lat, origin.lng, destination.lat, destination.lng);
+        }
+
+        function showRoute(source, route_type, origin_lat, origin_lon, destination_lat, destination_lon) {
+            $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:5000/covid19-routes/api/v1.0/ciudad-real/route/",
+                data: {
+                    route_type: route_type,
+                    origin_lat: origin_lat,
+                    origin_lon: origin_lon,
+                    destination_lat: destination_lat,
+                    destination_lon: destination_lon
+                },
+                success: function(response) {
+                    map.getSource(source).setData(response);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
