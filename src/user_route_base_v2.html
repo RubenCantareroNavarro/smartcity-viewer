@@ -57,12 +57,23 @@
     <a href="#" class="add_marker_class" onclick="sendResult()">Send result</a>
     <a href="#" class="add_marker_class" onclick="addMarker()">Add marker</a>
 
+    <div style="position: absolute; z-index: 1;">
+        <p id="container"></p>
+    </div>
+
+
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5jbjkwIiwiYSI6ImNrYWdudzluOTA1Zm0zMW1vcGxiZDFpN3gifQ.Gi7bav34XZCKoS9SczeeDg';
-        var origin = [-3.920102, 38.990590];
         var ciudad_real = [-3.927374, 38.985531];
-        var goal = [-3.931486, 38.972508];
         var api_base_url = "http://127.0.0.1:5001"
+        var pickers = Array();
+        var routes_geometry = Array();
+        var cases;
+        var active_case = {
+            case_id: "",
+            origin: "",
+            destiny: ""
+        };
 
         var map = new mapboxgl.Map({
             container: 'map',
@@ -70,9 +81,6 @@
             center: ciudad_real,
             zoom: 14
         });
-
-        var pickers = Array();
-        var routes_geometry = Array();
 
         map.on('load', function() {
             map.addSource('route', {
@@ -126,7 +134,7 @@
                 function(error, image) {
                     if (error) throw error;
                     map.addImage('goal', image);
-                    map.addSource('point', {
+                    map.addSource('goal_source', {
                         'type': 'geojson',
                         'data': {
                             'type': 'FeatureCollection',
@@ -134,15 +142,15 @@
                                 'type': 'Feature',
                                 'geometry': {
                                     'type': 'Point',
-                                    'coordinates': goal
+                                    'coordinates': []
                                 }
                             }]
                         }
                     });
                     map.addLayer({
-                        'id': 'points',
+                        'id': 'goal_layer',
                         'type': 'symbol',
-                        'source': 'point',
+                        'source': 'goal_source',
                         'layout': {
                             'icon-image': 'goal',
                             'icon-size': 0.07
@@ -151,16 +159,82 @@
                 }
             );
 
+            init_radio_buttons();
+        });
+
+        function init_radio_buttons() {
+            $.ajax({
+                type: "GET",
+                url: api_base_url + "/covid19-routes/api/v1.0/ciudad-real/survey/get-cases/",
+
+                success: function(response) {
+                    cases = response
+                    for (var case_id in cases) {
+                        createNewCheckboxt(case_id, case_id, cases[case_id].name);
+                    }
+                }
+            });
+        }
+
+        function clean_elements() {
+            pickers.forEach(element => element.remove());
+
+            map.getSource("route").setData({
+                'type': 'FeatureCollection',
+                'features': []
+            });
+
+            pickers = Array();
+            routes_geometry = Array();
+        }
+
+        function init_case() {
+            clean_elements();
             initial_picker = new mapboxgl.Marker({
                     draggable: false,
                     color: '#0cf700'
                 })
-                .setLngLat(origin)
+                .setLngLat(active_case.origin)
                 .addTo(map);
 
             pickers.push(initial_picker);
-        });
 
+            map.getSource("goal_source").setData({
+                'type': 'FeatureCollection',
+                'features': [{
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': active_case.destiny
+                    }
+                }]
+            });
+        }
+
+        function createNewCheckboxt(id, value, label_text) {
+            var checkbox = document.createElement('input');
+            checkbox.type = 'radio';
+            checkbox.id = id;
+            checkbox.name = "case_checkbox";
+            checkbox.value = value;
+            checkbox.addEventListener('change', function() {
+                active_case.case_id = this.value;
+                active_case.origin = cases[this.value].origin;
+                active_case.destiny = cases[this.value].destiny;
+                init_case();
+            });
+
+            var label = document.createElement('label')
+            label.htmlFor = id;
+            label.appendChild(document.createTextNode(label_text));
+
+            var br = document.createElement('br');
+
+            var container = document.getElementById('container');
+            container.appendChild(checkbox);
+            container.appendChild(label);
+            container.appendChild(br);
+        }
 
         function addMarker() {
             picker = new mapboxgl.Marker({
@@ -232,14 +306,24 @@
         }
 
         function sendResult() {
+            if (routes_geometry.length == 0) {
+                alert("The route is empty. Please, add markers from origin to destination.");
+                return
+            }
+
             if (confirm("Are you sure?")) {
                 var data = {
-                    coordinates: preparePoints(),
-                    user: "Ruben",
-                    case: document.title
-                };
-
-                console.log(data);
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": preparePoints()
+                    },
+                    "properties": {
+                        "case_id": active_case.case_id,
+                        "origin": active_case.origin,
+                        "destiny": active_case.destiny
+                    }
+                }
 
                 $.ajax({
                     url: api_base_url + '/covid19-routes/api/v1.0/ciudad-real/survey/',
@@ -248,7 +332,7 @@
                     dataType: 'json',
                     contentType: 'application/json',
                     success: function(response) {
-                        alert("The suervey is complete. You can close the window.");
+                        alert("The suervey is complete. You can select other case.");
                     },
                     error: function(error) {
                         console.log("Error sending data");
