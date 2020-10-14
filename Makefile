@@ -4,8 +4,8 @@ all: start-map-server
 	
 
 start-olc-server:
-	go run ../open-location-code/tile_server/main.go --logtostderr --port 8080 
+	go run ../open-location-code/tile_server/main.go --logtostderr --port 8082 
 
 start-map-server: 
-	python3 -m http.server 8000
+	python3 -m http.server 8080
 	
