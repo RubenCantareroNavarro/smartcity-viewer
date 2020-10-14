@@ -65,7 +65,7 @@
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5jbjkwIiwiYSI6ImNrYWdudzluOTA1Zm0zMW1vcGxiZDFpN3gifQ.Gi7bav34XZCKoS9SczeeDg';
         var ciudad_real = [-3.927374, 38.985531];
-        var api_base_url = "http://127.0.0.1:8081"
+        var api_base_url = "http://pike.esi.uclm.es:7167"
         var pickers = Array();
         var routes_geometry = Array();
         var cases;
@@ -130,7 +130,7 @@
 
 
             map.loadImage(
-                'http://0.0.0.0:8080/assets/linea-de-meta.png',
+                'http://pike.esi.uclm.es:7166/assets/linea-de-meta.png',
                 function(error, image) {
                     if (error) throw error;
                     map.addImage('goal', image);

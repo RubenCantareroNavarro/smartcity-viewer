@@ -121,14 +121,14 @@
             map.addSource('wms-olc', {
                 'type': 'raster',
                 'tiles': [
-                    'http://localhost:8082/grid/wms/{z}/{x}/{y}.png'
+                    'http://pike.esi.uclm.es:7168/grid/wms/{z}/{x}/{y}.png'
                 ],
                 'tileSize': 256
             });
 
             map.addSource('streets-near-school', {
                 'type': 'geojson',
-                'data': 'http://0.0.0.0:8080/data/streets-near.school.geojson'
+                'data': 'http://pike.esi.uclm.es:7166/data/streets-near.school.geojson'
             });
 
             map.addLayer({
@@ -148,7 +148,7 @@
 
             map.addSource('amenity-school', {
                 type: 'geojson',
-                data: 'http://0.0.0.0:8080/data/amenity-school.geojson'
+                data: 'http://pike.esi.uclm.es:7166/data/amenity-school.geojson'
             });
 
             map.addLayer({
@@ -555,7 +555,7 @@
 
             $.ajax({
                 type: "GET",
-                url: "http://127.0.0.1:8081/covid19-routes/api/v1.0/ciudad-real/danger-points/",
+                url: "http://pike.esi.uclm.es:7167/covid19-routes/api/v1.0/ciudad-real/danger-points/",
                 success: function(response) {
                     map.getSource('amenity-danger').setData(response);
                 }
@@ -582,7 +582,7 @@
         function showRoute(source, route_type, origin_lat, origin_lon, destination_lat, destination_lon) {
             $.ajax({
                 type: "GET",
-                url: "http://127.0.0.1:8081/covid19-routes/api/v1.0/ciudad-real/route/",
+                url: "http://pike.esi.uclm.es:7167/covid19-routes/api/v1.0/ciudad-real/route/",
                 data: {
                     route_type: route_type,
                     origin_lat: origin_lat,
