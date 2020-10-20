@@ -91,6 +91,8 @@
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5jbjkwIiwiYSI6ImNrYWdudzluOTA1Zm0zMW1vcGxiZDFpN3gifQ.Gi7bav34XZCKoS9SczeeDg';
         var ciudad_real = [-3.927374, 38.985531];
+        var api_base_url = "https://pike.esi.uclm.es:7167"
+        var web_base_url = "https://pike.esi.uclm.es:7168"
 
         var map = new mapboxgl.Map({
             container: 'map',
@@ -121,14 +123,14 @@
             map.addSource('wms-olc', {
                 'type': 'raster',
                 'tiles': [
-                    'http://pike.esi.uclm.es:7168/grid/wms/{z}/{x}/{y}.png'
+                    web_base_url + '/grid/wms/{z}/{x}/{y}.png'
                 ],
                 'tileSize': 256
             });
 
             map.addSource('streets-near-school', {
                 'type': 'geojson',
-                'data': 'http://pike.esi.uclm.es:7166/data/streets-near.school.geojson'
+                'data': web_base_url + '/data/streets-near.school.geojson'
             });
 
             map.addLayer({
@@ -148,7 +150,7 @@
 
             map.addSource('amenity-school', {
                 type: 'geojson',
-                data: 'http://pike.esi.uclm.es:7166/data/amenity-school.geojson'
+                data: web_base_url + '/data/amenity-school.geojson'
             });
 
             map.addLayer({
@@ -555,7 +557,7 @@
 
             $.ajax({
                 type: "GET",
-                url: "http://pike.esi.uclm.es:7167/covid19-routes/api/v1.0/ciudad-real/danger-points/",
+                url: api_base_url + "/covid19-routes/api/v1.0/ciudad-real/danger-points/",
                 success: function(response) {
                     map.getSource('amenity-danger').setData(response);
                 }
@@ -582,7 +584,7 @@
         function showRoute(source, route_type, origin_lat, origin_lon, destination_lat, destination_lon) {
             $.ajax({
                 type: "GET",
-                url: "http://pike.esi.uclm.es:7167/covid19-routes/api/v1.0/ciudad-real/route/",
+                url: api_base_url + "/covid19-routes/api/v1.0/ciudad-real/route/",
                 data: {
                     route_type: route_type,
                     origin_lat: origin_lat,
