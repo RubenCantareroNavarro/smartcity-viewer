@@ -295,7 +295,7 @@
                         ['zoom'],
                         1,
                         2,
-                        16,
+                        17,
                         20
                     ],
                     // Transition from heatmap to circle layer by zoom level
@@ -434,7 +434,7 @@
         map.on('click', 'amenity-danger-point', function(e) {
             var coordinates = e.features[0].geometry.coordinates.slice();
             var properties = e.features[0].properties;
-            var description = '<strong>Danger Point</strong><p>Amenity near: ' + properties.amenity_near + '</p>' + '<p>Danger level: ' + properties.danger + '</p>'
+            var description = '<strong style="color:red;font-size:25px;">Danger Point</strong><p style="color:black;font-size:20px;">Amenity near: ' + properties.amenity_near + '</p>' + '<p style="color:black;font-size:20px;">Danger level: ' + properties.danger + '</p>'
 
             new mapboxgl.Popup()
                 .setLngLat(coordinates)

@@ -7,10 +7,27 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function(){
+            // Add minus icon for collapse element which is open by default
+            $(".collapse.show").each(function(){
+                $(this).prev(".card-header").find(".fa").addClass("fa-minus").removeClass("fa-plus");
+            });
+            
+            // Toggle plus minus icon on show hide of collapse element
+            $(".collapse").on('show.bs.collapse', function(){
+                $(this).prev(".card-header").find(".fa").removeClass("fa-plus").addClass("fa-minus");
+            }).on('hide.bs.collapse', function(){
+                $(this).prev(".card-header").find(".fa").removeClass("fa-minus").addClass("fa-plus");
+            });
+        });
+    </script>
 
     <style>
         body {
@@ -34,10 +51,21 @@
         <div class="card-body">
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                    <label class="input-group-text" for="inputGroupSelect01">Options</label>
+                    <label class="input-group-text" for="inputGroupSelectCase">Cases</label>
                 </div>
-                <select class="custom-select" id="inputGroupSelect01" onchange="case_selected()">
+                <select class="custom-select" id="inputGroupSelectCase" onchange="case_selected()">
                   <option value = "-1" selected>Choose...</option>
+                </select>
+            </div>
+
+            <p>How much do you know the city of Ciudad Real?</p>
+            <div class="input-group mb-3">
+                <select class="custom-select" id="inputGroupSelectCityKnow">
+                    <option value = "-1" selected>Choose...</option>    
+                    <option value = "zero">I don't know the city</option>
+                    <option value = "low">I know the city very little</option>
+                    <option value = "medium">I know the city</option>
+                    <option value = "high">I know the city perfectly</option>
                 </select>
             </div>
 
@@ -50,8 +78,31 @@
                 </div>
             </div>
         </div>
-
     </div>
+
+    <div class="accordion" id="accordion"></div>
+        <div class="card" style="width: 20rem;margin-left: 20px;margin-top: 20px;">
+            <div class="card-header">
+                <h2 class="mb-0">
+                <button class="btn btn-link btn-block" id="context-button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" disabled>
+                    <i class="fa fa-plus float-right" style="position: relative; top: 5px;"></i> 
+                    <b class="header-title float-left"> 
+                        Context
+                    </b> 
+                </button>
+                </h2>
+            </div>
+
+            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion" data-parent="#accordion">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item" id="context-explication"></li>
+                    <li class="list-group-item" id="list-item-hour"></li>
+                    <li class="list-group-item" id="list-item-week-day"></li>
+                    <li class="list-group-item" id="list-item-month"></li>
+                    <li class="list-group-item" id="list-item-is-public-holiday"></li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -67,7 +118,8 @@
         var active_case = {
             case_id: "",
             origin: "",
-            destiny: ""
+            destiny: "",
+            context: "",
         };
 
         var map = new mapboxgl.Map({
@@ -177,17 +229,19 @@
             option.value = id;
             option.innerHTML = label_text;
 
-            var select = document.getElementById('inputGroupSelect01');
+            var select = document.getElementById('inputGroupSelectCase');
             select.appendChild(option);
         }
 
         function case_selected() {
-            select = document.getElementById("inputGroupSelect01");
+            select = document.getElementById("inputGroupSelectCase");
 
             if (select.value != -1) {
                 active_case.case_id = select.value;
                 active_case.origin = cases[select.value].origin;
                 active_case.destiny = cases[select.value].destiny;
+                active_case.context = cases[select.value].context;
+
                 init_case();
             }
         }
@@ -206,9 +260,10 @@
 
         function init_case() {
             clean_elements();
+            init_context();
             initial_marker = new mapboxgl.Marker({
                     draggable: false,
-                    color: '#0cf700'
+                    color: '#ff004c'
                 })
                 .setLngLat(active_case.origin)
                 .addTo(map);
@@ -225,6 +280,26 @@
                     }
                 }]
             });
+        }
+
+        function init_context(){
+            document.getElementById("context-button").disabled = false;
+            $('#collapseOne').collapse(true);
+            
+            list_item = document.getElementById("context-explication");
+            list_item.innerHTML = `You must imagine that you want to go from the origin to the destination indicated on the map considering that it is ${active_case.context["time"]} on a ${active_case.context["week-day"]} in ${active_case.context["month"]}. ${active_case.context["is-public-holiday"]=="Yes" ? "It is" : "It is not"} a local holiday in the city.<br> <br> <b><i>You should consider that we are in the Covid-19 pandemic, so the route must be the safest from your point of view.</i></b>`;
+
+            list_item = document.getElementById("list-item-hour");
+            list_item.innerHTML = `<b>Time:</b> ${active_case.context["time"]}`;
+
+            list_item = document.getElementById("list-item-week-day");
+            list_item.innerHTML = `<b>Week-day:</b> ${active_case.context["week-day"]}`;
+
+            list_item = document.getElementById("list-item-month");
+            list_item.innerHTML = `<b>Month:</b> ${active_case.context["month"]}`;
+
+            list_item = document.getElementById("list-item-is-public-holiday");
+            list_item.innerHTML = `<b>Public holiday:</b> ${active_case.context["is-public-holiday"]}`;
         }
 
         function addMarker() {
@@ -297,13 +372,17 @@
         }
 
         function sendResult() {
-            select = document.getElementById("inputGroupSelect01");
+            selectCase = document.getElementById("inputGroupSelectCase");
+            selectCityKnow = document.getElementById("inputGroupSelectCityKnow");
 
             if (routes_geometry.length == 0) {
                 alert("The route is empty. Please, add markers from origin to destination.");
                 return
-            } else if (select.options[select.value].disabled == true) {
+            } else if (selectCase.options[selectCase.value].disabled == true) {
                 alert("You have already done this case. Select a different one");
+                return
+            }else if(selectCityKnow.value == -1){
+                alert("You must indicate how much you know the city");
                 return
             }
 
@@ -316,6 +395,8 @@
                     },
                     "properties": {
                         "case_id": active_case.case_id,
+                        "knowledge_city_level": selectCityKnow.value,
+                        "context": active_case.context,
                         "origin": active_case.origin,
                         "destiny": active_case.destiny
                     }
