@@ -10,62 +10,77 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-    <script>
-        $(document).ready(function(){
-            // Add minus icon for collapse element which is open by default
-            $(".collapse.show").each(function(){
-                $(this).prev(".card-header").find(".fa").addClass("fa-minus").removeClass("fa-plus");
-            });
-            
-            // Toggle plus minus icon on show hide of collapse element
-            $(".collapse").on('show.bs.collapse', function(){
-                $(this).prev(".card-header").find(".fa").removeClass("fa-plus").addClass("fa-minus");
-            }).on('hide.bs.collapse', function(){
-                $(this).prev(".card-header").find(".fa").removeClass("fa-minus").addClass("fa-plus");
-            });
-        });
-    </script>
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-        
-        #map {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="./src/style.css"  />
 </head>
 
 <body>
-    <div id="map"></div>
-
-    <div class="card" style="width: 20rem;margin-left: 20px;margin-top: 20px;">
-        <div class="card-body">
-            <div class="input-group mb-3">
+    <button type="button" href="#menu-toggle" class="btn btn-default btn-lg menu-toggle toogle-button" data-toggle="collapse" data-target="#collapseSurvey" aria-expanded="true" aria-controls="collapseSurvey">
+        <i class="fa fa-bars float-right"></i>
+    </button>
+    
+    <div class="collapse show test" id="collapseSurvey">
+        <div class="card card-body">
+            <div class="input-group mb-3" style="margin-top: 60px;">
                 <div class="input-group-prepend">
-                    <label class="input-group-text" for="inputGroupSelectCase">Cases</label>
+                    <label class="input-group-text" for="inputGroupSelectCase">Case</label>
                 </div>
                 <select class="custom-select" id="inputGroupSelectCase" onchange="case_selected()">
                   <option value = "-1" selected>Choose...</option>
                 </select>
             </div>
 
-            <p>How much do you know the city of Ciudad Real?</p>
-            <div class="input-group mb-3">
+            <div class="row">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item" id="context-explication" style="text-align: justify;">Select a case to see the description</li>
+                    <li class="list-group-item" id="list-item-hour"><b>Time:</b></li>
+                    <li class="list-group-item" id="list-item-week-day"><b>Week-day</b></li>
+                    <li class="list-group-item" id="list-item-month"><b>Month:</b></li>
+                    <li class="list-group-item" id="list-item-is-public-holiday"><b>Public holiday:</b></li>
+                </ul>
+            </div>
+          
+            <div class="mb-3">
+                <label for="inputGroupSelectCityKnow">How much do you know the city of Ciudad Real?</label>
                 <select class="custom-select" id="inputGroupSelectCityKnow">
                     <option value = "-1" selected>Choose...</option>    
                     <option value = "zero">I don't know the city</option>
                     <option value = "low">I know the city very little</option>
                     <option value = "medium">I know the city</option>
                     <option value = "high">I know the city perfectly</option>
+                </select>
+            </div>
+                       
+            <div class="mb-3">
+                <label for="user_comments">Do you want to tell us why you have chosen this route?</label>
+                <textarea class="form-control" id="user_comments" rows="3" placeholder="Enter your description"></textarea>
+            </div> 
+
+            <div class="form-group">
+                <label for="inputEmail">Email address</label>
+                <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email">
+                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+            </div>
+
+            <div class="mb-3">
+                <label for="inputGroupSelectAge">How old are you?</label>
+                <select class="custom-select" id="inputGroupSelectAge">
+                    <option value = "-1" selected>Choose...</option>    
+                    <option value = "0-14">0-14 years</option>
+                    <option value = "15-24">15-24 years</option>
+                    <option value = "25-64">25-64 years</option>
+                    <option value = "65">65 years and above</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="inputGroupSelectGender">What is your gender?</label>
+                <select class="custom-select" id="inputGroupSelectGender">
+                    <option value = "-1" selected>Choose...</option>    
+                    <option value = "male">Male</option>
+                    <option value = "female">Female</option>
+                    <option value = "other">Other</option>
                 </select>
             </div>
 
@@ -79,349 +94,13 @@
                 <div class="col-12" style="margin-top: 10px; text-align: center;">
                     <a href=https://rubencantareronavarro.github.io/covid19-routes target="_blank">Do you need help? See doc</a>
                 </div>
-            </div>           
+            </div>               
         </div>
     </div>
 
-    <div class="accordion" id="accordion"></div>
-        <div class="card" style="width: 20rem;margin-left: 20px;margin-top: 20px;">
-            <div class="card-header">
-                <h2 class="mb-0">
-                <button class="btn btn-link btn-block" id="context-button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" disabled>
-                    <i class="fa fa-plus float-right" style="position: relative; top: 5px;"></i> 
-                    <b class="header-title float-left"> 
-                        Context
-                    </b> 
-                </button>
-                </h2>
-            </div>
-
-            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion" data-parent="#accordion">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item" id="context-explication"></li>
-                    <li class="list-group-item" id="list-item-hour"></li>
-                    <li class="list-group-item" id="list-item-week-day"></li>
-                    <li class="list-group-item" id="list-item-month"></li>
-                    <li class="list-group-item" id="list-item-is-public-holiday"></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5jbjkwIiwiYSI6ImNrYWdudzluOTA1Zm0zMW1vcGxiZDFpN3gifQ.Gi7bav34XZCKoS9SczeeDg';
-        var ciudad_real = [-3.927374, 38.985531];
-        var api_base_url = "https://pike.esi.uclm.es:7167"
-        var goal_file = "https://pike.esi.uclm.es:7166/assets/linea-de-meta.png"
-            // var api_base_url = "http://0.0.0.0:8081"
-            // var goal_file = "http://0.0.0.0:8080/assets/linea-de-meta.png"
-        var markers = Array();
-        var routes_geometry = Array();
-        var cases;
-        var active_case = {
-            case_id: "",
-            origin: "",
-            destiny: "",
-            context: "",
-        };
-
-        var map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/rubencn90/ckfwo9gop092p19uektbw5mz3/draft',
-            center: ciudad_real,
-            zoom: 14
-        });
-
-        map.on('load', function() {
-            map.addSource('route', {
-                'type': 'geojson',
-                lineMetrics: true,
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': []
-                }
-            });
-
-            map.addLayer({
-                'id': 'route_layer',
-                'type': 'line',
-                'source': 'route',
-                'layout': {
-                    'line-join': 'round',
-                    'line-cap': 'round'
-                },
-                'paint': {
-                    'line-color': '#ff004c',
-                    'line-width': 6,
-                    'line-gradient': [
-                        'interpolate', ['linear'],
-                        ['line-progress'],
-                        0,
-                        '#8800ff',
-                        0.125,
-                        '#5100ff',
-                        0.250,
-                        '#000dff',
-                        0.375,
-                        '#0066ff',
-                        0.5,
-                        '#00a2ff',
-                        0.625,
-                        '#00e5ff',
-                        0.750,
-                        '#00fff7',
-                        0.875,
-                        '#00ffc3',
-                        1,
-                        '#05ff93'
-                    ]
-                }
-            });
-
-
-            map.loadImage(
-                goal_file,
-                function(error, image) {
-                    if (error) throw error;
-                    map.addImage('goal', image);
-                    map.addSource('goal_source', {
-                        'type': 'geojson',
-                        'data': {
-                            'type': 'FeatureCollection',
-                            'features': [{
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': []
-                                }
-                            }]
-                        }
-                    });
-                    map.addLayer({
-                        'id': 'goal_layer',
-                        'type': 'symbol',
-                        'source': 'goal_source',
-                        'layout': {
-                            'icon-image': 'goal',
-                            'icon-size': 0.07
-                        }
-                    });
-                }
-            );
-
-            init_options();
-        });
-
-        function init_options() {
-            $.ajax({
-                type: "GET",
-                url: api_base_url + "/covid19-routes/api/v1.0/ciudad-real/survey/get-cases/",
-
-                success: function(response) {
-                    cases = response
-                    for (var case_id in cases) {
-                        createNewOption(case_id, cases[case_id].name);
-                    }
-                }
-            });
-        }
-
-        function createNewOption(id, label_text) {
-            var option = document.createElement('option');
-            option.id = id;
-            option.value = id;
-            option.innerHTML = label_text;
-
-            var select = document.getElementById('inputGroupSelectCase');
-            select.appendChild(option);
-        }
-
-        function case_selected() {
-            select = document.getElementById("inputGroupSelectCase");
-
-            if (select.value != -1) {
-                active_case.case_id = select.value;
-                active_case.origin = cases[select.value].origin;
-                active_case.destiny = cases[select.value].destiny;
-                active_case.context = cases[select.value].context;
-
-                init_case();
-            }
-        }
-
-        function clean_elements() {
-            markers.forEach(element => element.remove());
-
-            map.getSource("route").setData({
-                'type': 'FeatureCollection',
-                'features': []
-            });
-
-            markers = Array();
-            routes_geometry = Array();
-        }
-
-        function init_case() {
-            clean_elements();
-            init_context();
-            initial_marker = new mapboxgl.Marker({
-                    draggable: false,
-                    color: '#ff004c'
-                })
-                .setLngLat(active_case.origin)
-                .addTo(map);
-
-            markers.push(initial_marker);
-
-            map.getSource("goal_source").setData({
-                'type': 'FeatureCollection',
-                'features': [{
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': active_case.destiny
-                    }
-                }]
-            });
-        }
-
-        function init_context(){
-            document.getElementById("context-button").disabled = false;
-            $('#collapseOne').collapse(true);
-            
-            list_item = document.getElementById("context-explication");
-            list_item.innerHTML = `You must imagine that you want to go from the origin to the destination indicated on the map considering that it is ${active_case.context["time"]} on a ${active_case.context["week-day"]} in ${active_case.context["month"]}. ${active_case.context["is-public-holiday"]=="Yes" ? "It is" : "It is not"} a local holiday in the city.<br> <br> <b><i>You should consider that we are in the Covid-19 pandemic, so the route must be the safest from your point of view.</i></b>`;
-
-            list_item = document.getElementById("list-item-hour");
-            list_item.innerHTML = `<b>Time:</b> ${active_case.context["time"]}`;
-
-            list_item = document.getElementById("list-item-week-day");
-            list_item.innerHTML = `<b>Week-day:</b> ${active_case.context["week-day"]}`;
-
-            list_item = document.getElementById("list-item-month");
-            list_item.innerHTML = `<b>Month:</b> ${active_case.context["month"]}`;
-
-            list_item = document.getElementById("list-item-is-public-holiday");
-            list_item.innerHTML = `<b>Public holiday:</b> ${active_case.context["is-public-holiday"]}`;
-        }
-
-        function addMarker() {
-            marker = new mapboxgl.Marker({
-                    draggable: true,
-                    color: '#00f7da'
-                })
-                .setPopup(new mapboxgl.Popup().setHTML(markers.length))
-                .setLngLat(map.getCenter())
-                .addTo(map);
-
-            marker.on('dragend', updateRoute);
-            markers.push(marker);
-            updateRoute();
-        }
-
-        function updateRoute() {
-            for (var i = markers.length - 1; i > 0; i--) {
-                var destination = markers[i].getLngLat();
-                var origin = markers[i - 1].getLngLat();
-
-                showRoute('route', 'danger', origin.lat, origin.lng, destination.lat, destination.lng, i);
-            }
-        }
-
-        function showRoute(source, route_type, origin_lat, origin_lon, destination_lat, destination_lon, index) {
-            $.ajax({
-                type: "GET",
-                url: api_base_url + "/covid19-routes/api/v1.0/ciudad-real/route/",
-                data: {
-                    route_type: route_type,
-                    origin_lat: origin_lat,
-                    origin_lon: origin_lon,
-                    destination_lat: destination_lat,
-                    destination_lon: destination_lon
-                },
-                success: function(response) {
-                    data = prepareJSONLine(response.geometry.coordinates, index);
-                    map.getSource(source).setData(data);
-                }
-            });
-        }
-
-        function prepareJSONLine(new_coordinates, index) {
-            if (routes_geometry.length == index - 1) {
-                routes_geometry.push(new_coordinates);
-            } else {
-                routes_geometry[index - 1] = new_coordinates;
-            }
-
-            data = {
-                'type': 'Feature',
-                'properties': {},
-                'geometry': {
-                    'type': 'LineString',
-                    'coordinates': preparePoints()
-                }
-            };
-            return data;
-        }
-
-        function preparePoints() {
-            coordinates = Array();
-            routes_geometry.forEach(element => {
-                element.forEach(element2 => {
-                    coordinates.push(element2);
-                });
-            });
-            return coordinates;
-        }
-
-        function sendResult() {
-            selectCase = document.getElementById("inputGroupSelectCase");
-            selectCityKnow = document.getElementById("inputGroupSelectCityKnow");
-
-            if (routes_geometry.length == 0) {
-                alert("The route is empty. Please, add markers from origin to destination.");
-                return
-            } else if (selectCase.options[selectCase.value].disabled == true) {
-                alert("You have already done this case. Select a different one");
-                return
-            }else if(selectCityKnow.value == -1){
-                alert("You must indicate how much you know the city");
-                return
-            }
-
-            if (confirm("Are you sure?")) {
-                var data = {
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "LineString",
-                        "coordinates": preparePoints()
-                    },
-                    "properties": {
-                        "case_id": active_case.case_id,
-                        "knowledge_city_level": selectCityKnow.value,
-                        "context": active_case.context,
-                        "origin": active_case.origin,
-                        "destiny": active_case.destiny
-                    }
-                }
-
-                $.ajax({
-                    url: api_base_url + '/covid19-routes/api/v1.0/ciudad-real/survey/',
-                    data: JSON.stringify(data),
-                    method: 'POST',
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    success: function(response) {
-                        alert("The case is complete. You can select a different one.");
-                        select.options[select.value].disabled = true;
-                    },
-                    error: function(error) {
-                        console.log("Error sending data");
-                    }
-                });
-            }
-        }
-    </script>
+    <div id="map"></div>
+    
+    <button type="button" class="btn btn-primary btn-block" onclick="addMarker()" style="position: absolute; left: 30px; bottom: 50px; width: 300px;z-index: -2 !important ;">Add marker</button>
 </body>
-
+    <script type="text/javascript" src="./src/survey.js"></script>
 </html>
