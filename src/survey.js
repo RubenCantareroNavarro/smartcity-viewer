@@ -6,7 +6,7 @@ $(".menu-toggle").click(function(e) {
 mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5jbjkwIiwiYSI6ImNrYWdudzluOTA1Zm0zMW1vcGxiZDFpN3gifQ.Gi7bav34XZCKoS9SczeeDg';
 var ciudad_real = [-3.927374, 38.985531];
 var api_base_url = "https://pike.esi.uclm.es:7167"
-var goal_file = "https://pike.esi.uclm.es:7166/assets/linea-de-meta.png"
+var goal_file = "https://pike.esi.uclm.es:7166/assets/marcador-de-posicion.png"
     // var api_base_url = "http://0.0.0.0:8081"
     // var goal_file = "http://0.0.0.0:8080/assets/linea-de-meta.png"
 var markers = Array();
@@ -160,7 +160,7 @@ function init_case() {
     init_context();
     initial_marker = new mapboxgl.Marker({
             draggable: false,
-            color: '#ff004c'
+            color: '#4287f5'
         })
         .setLngLat(active_case.origin)
         .addTo(map);
