@@ -27,15 +27,25 @@
             <div class="sidebar-content">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <label class="input-group-text" for="inputGroupSelectCase">Cases</label>
+                        <label class="input-group-text" for="inputGroupSelectCase">Case</label>
                     </div>
                     <select class="custom-select" id="inputGroupSelectCase" onchange="case_selected()">
                       <option value = "-1" selected>Choose...</option>
                     </select>
                 </div>
+
+                <div class="row">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item" id="context-explication" style="text-align: justify;">Select a case to see the description</li>
+                        <li class="list-group-item" id="list-item-hour"><b>Time:</b></li>
+                        <li class="list-group-item" id="list-item-week-day"><b>Week-day</b></li>
+                        <li class="list-group-item" id="list-item-month"><b>Month:</b></li>
+                        <li class="list-group-item" id="list-item-is-public-holiday"><b>Public holiday:</b></li>
+                    </ul>
+                </div>
               
                 <div class="mb-3">
-                    <p>How much do you know the city of Ciudad Real?</p>
+                    <label for="inputGroupSelectCityKnow">How much do you know the city of Ciudad Real?</label>
                     <select class="custom-select" id="inputGroupSelectCityKnow">
                         <option value = "-1" selected>Choose...</option>    
                         <option value = "zero">I don't know the city</option>
@@ -44,9 +54,20 @@
                         <option value = "high">I know the city perfectly</option>
                     </select>
                 </div>
-           
+                           
                 <div class="mb-3">
-                    <p>How old are you?</p>
+                    <label for="user_comments">Do you want to tell us why you have chosen this route?</label>
+                    <textarea class="form-control" id="user_comments" rows="3" placeholder="Enter your description"></textarea>
+                </div> 
+
+                <div class="form-group">
+                    <label for="inputEmail">Email address</label>
+                    <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email">
+                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="inputGroupSelectAge">How old are you?</label>
                     <select class="custom-select" id="inputGroupSelectAge">
                         <option value = "-1" selected>Choose...</option>    
                         <option value = "0-14">0-14 years</option>
@@ -57,18 +78,13 @@
                 </div>
 
                 <div class="mb-3">
-                    <p>What is your gender?</p>
+                    <label for="inputGroupSelectGender">What is your gender?</label>
                     <select class="custom-select" id="inputGroupSelectGender">
                         <option value = "-1" selected>Choose...</option>    
                         <option value = "male">Male</option>
                         <option value = "female">Female</option>
                         <option value = "other">Other</option>ç
                     </select>
-                </div>
-                
-                <div class="mb-3">
-                    <p>Do you want to tell us why you have chosen this route?</p>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
                 </div>
 
                 <div class="row">
@@ -81,17 +97,7 @@
                     <div class="col-12" style="margin-top: 10px; text-align: center;">
                         <a href=https://rubencantareronavarro.github.io/covid19-routes target="_blank">Do you need help? See doc</a>
                     </div>
-                </div>
-
-                <div class="row">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item" id="context-explication" style="text-align: justify;">Select a case to see the description</li>
-                        <li class="list-group-item" id="list-item-hour"><b>Time:</b></li>
-                        <li class="list-group-item" id="list-item-week-day"><b>Week-day</b></li>
-                        <li class="list-group-item" id="list-item-month"><b>Month:</b></li>
-                        <li class="list-group-item" id="list-item-is-public-holiday"><b>Public holiday:</b></li>
-                    </ul>
-                </div>
+                </div>               
             </div>
         </div>
 
@@ -99,8 +105,7 @@
             <!-- Page Content -->
         </div>
         <div id="map"></div>
-      </div>
-
+    
 </body>
     <script type="text/javascript" src="survey.js"></script>
 </html>
