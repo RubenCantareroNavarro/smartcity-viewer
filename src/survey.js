@@ -145,6 +145,7 @@ function case_selected() {
 
 function clean_elements() {
     markers.forEach(element => element.remove());
+    document.getElementById("user_comments").value = "";
 
     map.getSource("route").setData({
         'type': 'FeatureCollection',
