@@ -302,7 +302,6 @@ function sendResult() {
                 "knowledge_city_level": selectCityKnow.value,
                 "age": selectAge.value,
                 "gender": selectGender.value,
-                "email": document.getElementById("inputEmail").value,
                 "comments": document.getElementById("user_comments").value,
                 "context": active_case.context,
                 "origin": active_case.origin,
